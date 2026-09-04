@@ -155,7 +155,12 @@ site_url = "http://127.0.0.1:3000"
 # The public URL that Auth serves on. Defaults to the API external URL with `/auth/v1` appended.
 # external_url = ""
 # A list of *exact* URLs that auth providers are permitted to redirect to post authentication.
-additional_redirect_urls = ["http://localhost:3000", "http://127.0.0.1:3000"]
+additional_redirect_urls = [
+  "http://localhost:3000/auth/confirm",
+  "http://127.0.0.1:3000/auth/confirm",
+  "http://localhost:3000/auth/update-password",
+  "http://127.0.0.1:3000/auth/update-password",
+]
 # How long tokens are valid for, in seconds. Defaults to 3600 (1 hour), maximum 604,800 (1 week).
 jwt_expiry = 3600
 # JWT issuer URL. If not set, defaults to auth.external_url.
@@ -393,17 +398,3 @@ orioledb_version = ""
 # Configures S3 bucket URL, eg. <bucket_name>.s3-<region>.amazonaws.com
 s3_host = "env(S3_HOST)"
 # Configures S3 bucket region, eg. us-east-1
-s3_region = "env(S3_REGION)"
-# Configures AWS_ACCESS_KEY_ID for S3 bucket
-s3_access_key = "env(S3_ACCESS_KEY)"
-# Configures AWS_SECRET_ACCESS_KEY for S3 bucket
-s3_secret_key = "env(S3_SECRET_KEY)"
-
-# pg-delta is the schema diff engine for db diff / db pull / db remote commit.
-# Set enabled = false to fall back to the legacy migra engine.
-[experimental.pgdelta]
-enabled = true
-# Directory under `supabase/` where declarative files are written.
-# declarative_schema_path = "./schemas"
-# JSON string passed through to pg-delta SQL formatting.
-# format_options = "{\"keywordCase\":\"upper\",\"indent\":2,\"maxWidth\":80,\"commaStyle\":\"trailing\"}"
