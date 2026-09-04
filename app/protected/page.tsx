@@ -11,6 +11,16 @@ async function DashboardContent() {
     redirect("/auth/login");
   }
 
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", data.claims.sub)
+    .single();
+
+  if (profile?.role === "admin") {
+    redirect("/admin");
+  }
+
   return <StudentDashboard />;
 }
 

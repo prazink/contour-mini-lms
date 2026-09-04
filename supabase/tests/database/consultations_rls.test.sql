@@ -2,7 +2,7 @@ begin;
 
 create extension if not exists pgtap with schema extensions;
 
-select plan(15);
+select plan(18);
 
 select has_table('public', 'profiles', 'profiles table exists');
 select has_table('public', 'consultations', 'consultations table exists');
@@ -64,6 +64,19 @@ select results_eq(
   $$select count(*) from public.consultations$$,
   array[2::bigint],
   'a student sees only their consultations'
+);
+
+select results_eq(
+  $$select count(*) from public.profiles$$,
+  array[1::bigint],
+  'a student sees only their own profile'
+);
+
+select throws_ok(
+  $$update public.profiles set role = 'admin' where id = '11111111-1111-4111-8111-111111111111'$$,
+  '42501',
+  'permission denied for table profiles',
+  'a student cannot promote their own role'
 );
 
 select lives_ok(
@@ -177,6 +190,12 @@ select results_eq(
   $$select count(*) from public.consultations$$,
   array[4::bigint],
   'an admin can read every consultation'
+);
+
+select results_eq(
+  $$select count(*) from public.profiles$$,
+  array[3::bigint],
+  'an admin can read every profile'
 );
 
 select results_eq(

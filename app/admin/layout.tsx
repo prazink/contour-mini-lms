@@ -1,6 +1,6 @@
 import { ApplicationShell } from "@/components/application-shell";
 
-export default function ProtectedLayout({
+export default function AdminLayout({
   children,
 }: {
   children: React.ReactNode;
