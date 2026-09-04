@@ -1,6 +1,9 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { createConsultationSchema } from "../lib/consultations/validation.ts";
+import {
+  createConsultationSchema,
+  updateConsultationSchema,
+} from "../lib/consultations/validation.ts";
 
 const validConsultation = {
   firstName: "Ada",
@@ -60,6 +63,45 @@ describe("createConsultationSchema", () => {
       ...validConsultation,
       studentId: "22222222-2222-4222-8222-222222222222",
       status: "completed",
+    });
+
+    assert.equal(result.success, false);
+  });
+});
+
+describe("updateConsultationSchema", () => {
+  it("accepts a future reschedule operation", () => {
+    const result = updateConsultationSchema.safeParse({
+      action: "reschedule",
+      scheduledAt: "2099-02-10T09:00:00.000Z",
+    });
+
+    assert.equal(result.success, true);
+  });
+
+  it("rejects rescheduling into the past", () => {
+    const result = updateConsultationSchema.safeParse({
+      action: "reschedule",
+      scheduledAt: "2000-02-10T09:00:00.000Z",
+    });
+
+    assert.equal(result.success, false);
+  });
+
+  it("accepts explicit completion changes", () => {
+    assert.equal(
+      updateConsultationSchema.safeParse({
+        action: "setCompletion",
+        completed: true,
+      }).success,
+      true,
+    );
+  });
+
+  it("rejects additional fields on cancellation", () => {
+    const result = updateConsultationSchema.safeParse({
+      action: "cancel",
+      studentId: "22222222-2222-4222-8222-222222222222",
     });
 
     assert.equal(result.success, false);

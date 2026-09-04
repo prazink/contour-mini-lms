@@ -1,6 +1,6 @@
 "use client";
 
-import { Badge } from "@/components/ui/badge";
+import { ConsultationList } from "@/components/consultations/consultation-list";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -12,7 +12,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { type ConsultationSummary } from "@/lib/database.types";
-import { CalendarDays } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { type FormEvent, useEffect, useState } from "react";
 
@@ -43,83 +42,6 @@ function sortByScheduledTime(consultations: ConsultationSummary[]) {
   return [...consultations].sort(
     (left, right) =>
       Date.parse(left.scheduled_at) - Date.parse(right.scheduled_at),
-  );
-}
-
-function formatScheduledTime(value: string) {
-  return new Intl.DateTimeFormat(undefined, {
-    dateStyle: "medium",
-    timeStyle: "short",
-  }).format(new Date(value));
-}
-
-function ConsultationList({
-  consultations,
-  isLoading,
-}: {
-  consultations: ConsultationSummary[];
-  isLoading: boolean;
-}) {
-  if (isLoading) {
-    return (
-      <p className="text-sm text-muted-foreground" role="status">
-        Loading consultations…
-      </p>
-    );
-  }
-
-  if (consultations.length === 0) {
-    return (
-      <div className="rounded-lg border border-dashed p-8 text-center">
-        <CalendarDays
-          aria-hidden="true"
-          className="mx-auto mb-3 size-8 text-muted-foreground"
-        />
-        <p className="font-medium">No consultations booked</p>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Use the booking form to schedule your first consultation.
-        </p>
-      </div>
-    );
-  }
-
-  return (
-    <ul className="space-y-3">
-      {consultations.map((consultation) => (
-        <li key={consultation.id}>
-          <article className="rounded-lg border p-4">
-            <div className="flex flex-wrap items-start justify-between gap-3">
-              <div>
-                <h3 className="font-semibold">
-                  {consultation.first_name} {consultation.last_name}
-                </h3>
-                <time
-                  className="mt-1 block text-sm text-muted-foreground"
-                  dateTime={consultation.scheduled_at}
-                >
-                  {formatScheduledTime(consultation.scheduled_at)}
-                </time>
-              </div>
-              <Badge
-                variant={
-                  consultation.status === "cancelled"
-                    ? "destructive"
-                    : consultation.status === "completed"
-                      ? "secondary"
-                      : "outline"
-                }
-                className="capitalize"
-              >
-                {consultation.status}
-              </Badge>
-            </div>
-            <p className="mt-4 whitespace-pre-wrap text-sm">
-              {consultation.reason}
-            </p>
-          </article>
-        </li>
-      ))}
-    </ul>
   );
 }
 
@@ -178,6 +100,16 @@ export function StudentDashboard() {
   function updateField(field: keyof BookingForm, value: string) {
     setForm((current) => ({ ...current, [field]: value }));
     setFieldErrors((current) => ({ ...current, [field]: undefined }));
+  }
+
+  function handleConsultationUpdated(updated: ConsultationSummary) {
+    setConsultations((current) =>
+      sortByScheduledTime(
+        current.map((consultation) =>
+          consultation.id === updated.id ? updated : consultation,
+        ),
+      ),
+    );
   }
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -263,6 +195,7 @@ export function StudentDashboard() {
               <ConsultationList
                 consultations={consultations}
                 isLoading={isLoading}
+                onUpdated={handleConsultationUpdated}
               />
             )}
           </CardContent>
