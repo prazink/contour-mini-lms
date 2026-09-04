@@ -52,7 +52,15 @@ values
   );
 
 select results_eq(
-  $$select count(*) from public.profiles$$,
+  $$
+    select count(*)
+    from public.profiles
+    where id in (
+      '11111111-1111-4111-8111-111111111111',
+      '22222222-2222-4222-8222-222222222222',
+      'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa'
+    )
+  $$,
   array[3::bigint],
   'new auth users receive student profiles'
 );
@@ -187,13 +195,28 @@ set local role authenticated;
 set local request.jwt.claim.sub = 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa';
 
 select results_eq(
-  $$select count(*) from public.consultations$$,
+  $$
+    select count(*)
+    from public.consultations
+    where student_id in (
+      '11111111-1111-4111-8111-111111111111',
+      '22222222-2222-4222-8222-222222222222'
+    )
+  $$,
   array[4::bigint],
   'an admin can read every consultation'
 );
 
 select results_eq(
-  $$select count(*) from public.profiles$$,
+  $$
+    select count(*)
+    from public.profiles
+    where id in (
+      '11111111-1111-4111-8111-111111111111',
+      '22222222-2222-4222-8222-222222222222',
+      'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa'
+    )
+  $$,
   array[3::bigint],
   'an admin can read every profile'
 );
