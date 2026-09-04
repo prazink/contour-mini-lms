@@ -87,3 +87,5 @@ export type Database = {
 
 export type Consultation =
   Database["public"]["Tables"]["consultations"]["Row"];
+
+export type ConsultationSummary = Omit<Consultation, "student_id">;

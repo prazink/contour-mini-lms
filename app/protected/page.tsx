@@ -1,3 +1,4 @@
+import { StudentDashboard } from "@/components/consultations/student-dashboard";
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { Suspense } from "react";
@@ -10,14 +11,7 @@ async function DashboardContent() {
     redirect("/auth/login");
   }
 
-  return (
-    <section className="w-full space-y-3">
-      <h1 className="text-3xl font-bold tracking-tight">Student dashboard</h1>
-      <p className="text-muted-foreground">
-        Consultation management will be added in the next milestone.
-      </p>
-    </section>
-  );
+  return <StudentDashboard />;
 }
 
 export default function ProtectedPage() {

@@ -27,7 +27,7 @@ export default function ProtectedLayout({
             )}
           </div>
         </nav>
-        <div className="flex-1 flex flex-col gap-20 max-w-5xl p-5">
+        <div className="flex w-full max-w-5xl flex-1 flex-col p-5 py-10">
           {children}
         </div>
 
