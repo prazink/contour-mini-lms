@@ -2,6 +2,8 @@
 
 A focused consultation-management application built for the Contour Senior Software Engineer technical assessment. Students can authenticate, book and manage their own consultations. Administrators receive read-only visibility across the system.
 
+**Live application:** https://contour-mini-lms.vercel.app
+
 ## Delivered scope
 
 - Email/password sign-up, confirmation, login, password recovery and logout
