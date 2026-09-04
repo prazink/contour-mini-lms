@@ -1,3 +1,4 @@
+import { planConsultationUpdate } from "@/lib/consultations/transitions";
 import { updateConsultationSchema } from "@/lib/consultations/validation";
 import { createClient } from "@/lib/supabase/server";
 import { z } from "zod";
@@ -33,7 +34,11 @@ export async function PATCH(
   try {
     body = await request.json();
   } catch {
-    return errorResponse(400, "INVALID_JSON", "Request body must be valid JSON");
+    return errorResponse(
+      400,
+      "INVALID_JSON",
+      "Request body must be valid JSON",
+    );
   }
 
   const parsed = updateConsultationSchema.safeParse(body);
@@ -60,38 +65,27 @@ export async function PATCH(
 
   if (readError) {
     console.error("Failed to read consultation", { code: readError.code });
-    return errorResponse(500, "INTERNAL_ERROR", "The request could not be completed");
+    return errorResponse(
+      500,
+      "INTERNAL_ERROR",
+      "The request could not be completed",
+    );
   }
 
   if (!current) {
     return errorResponse(404, "NOT_FOUND", "Consultation was not found");
   }
 
-  const update = parsed.data;
-  let requiredStatus: typeof current.status;
-  let changes: { scheduled_at?: string; status?: typeof current.status };
+  const plan = planConsultationUpdate(current.status, parsed.data);
 
-  if (update.action === "reschedule") {
-    requiredStatus = "scheduled";
-    changes = { scheduled_at: update.scheduledAt };
-  } else if (update.action === "cancel") {
-    requiredStatus = "scheduled";
-    changes = { status: "cancelled" };
-  } else {
-    const targetStatus = update.completed ? "completed" : "scheduled";
-
-    if (current.status === targetStatus) {
-      return NextResponse.json(
-        { data: current },
-        { headers: { "Cache-Control": "private, no-store" } },
-      );
-    }
-
-    requiredStatus = update.completed ? "scheduled" : "completed";
-    changes = { status: targetStatus };
+  if (plan.kind === "noop") {
+    return NextResponse.json(
+      { data: current },
+      { headers: { "Cache-Control": "private, no-store" } },
+    );
   }
 
-  if (current.status !== requiredStatus) {
+  if (plan.kind === "invalid") {
     return errorResponse(
       409,
       "INVALID_STATE",
@@ -101,16 +95,20 @@ export async function PATCH(
 
   const { data, error } = await supabase
     .from("consultations")
-    .update(changes)
+    .update(plan.changes)
     .eq("id", id)
     .eq("student_id", studentId)
-    .eq("status", requiredStatus)
+    .eq("status", plan.requiredStatus)
     .select(CONSULTATION_FIELDS)
     .maybeSingle();
 
   if (error) {
     console.error("Failed to update consultation", { code: error.code });
-    return errorResponse(500, "INTERNAL_ERROR", "The request could not be completed");
+    return errorResponse(
+      500,
+      "INTERNAL_ERROR",
+      "The request could not be completed",
+    );
   }
 
   if (!data) {
