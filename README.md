@@ -57,7 +57,7 @@ tests/                           TypeScript unit tests
 
 ### Prerequisites
 
-- Node.js 20.9 or newer
+- Node.js 22 or newer
 - npm
 - Docker Desktop running
 - Supabase CLI (the commands below can use `npx`)
